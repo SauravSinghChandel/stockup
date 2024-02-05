@@ -7,11 +7,26 @@ their methods without affecting their learderboard stats.
 
 ## Screens
 
+### Login
+![Login](screens/login_page.png)
+
+### Home
+![Home](screens/home_page.png)
+
+### Play
+![Play](screens/play_page.png)
+
 ### Player Interface
 ![Player Interface](screens/player_interface_page.png)
 
+### Create
+![Create](screens/create_page.png)
+
 ### Admin Interface
 ![Admin Interface](screens/admin_interface_page.png)
+
+### Friends
+![Friends](screens/friends_page.png)
 
 ## Features
 
