@@ -113,61 +113,61 @@ Bots can be used to fill in practice games and simulate other players.
 
 ### App API
 
-1. Account Registration:
+**1. Account Registration:**
 
 -Endpoint: `POST /api/account/register`
 -Description: Request to register a new player account for a specific game.
 -Response: Success or failure indication.
 
-2. Game Duration Configuration:
+**2. Game Duration Configuration:**
 
 --Endpoint: `PUT /api/admin/game/configure`
 --Description: Request to configure the start and end times of each game individually.
 --Response: Success or failure indication.
 
-3. Moving Average Feature:
+**3. Moving Average Feature:**
 
 -Endpoint: `GET /api/player/moving-average`
 -Description: Request to retrieve the moving average data for candlestick charts.
 -Response: Moving average data.
 
-4. Changing User Details:
+**4. Changing User Details:**
 
 -Endpoint: `PUT /api/player/change-details`
 -Description: Request to allow players to change their username, passwords, or profile pictures.
 -Response: Success or failure indication.
 
-5. Stock Exchange - Buy:
+**5. Stock Exchange - Buy:**
 
 -Endpoint: `POST /api/player/buy-stock`
 -Description: Request to enable players to buy stocks.
 -Response: Stock buy success or failure.
 
-6. Stock Exchange - Sell:
+**6. Stock Exchange - Sell:**
 
 -Endpoint: `POST /api/player/sell-stock`
 -Description: Request to allow players to sell stocks.
 -Response: Stock sell success or failure.
 
-7. Goal Definition:
+**7. Goal Definition:**
 
 -Endpoint: `PUT /api/player/set-goal`
 -Description: Request to set the criteria for players to win the game.
 -Response: Success or failure indication.
 
-8. Game Creation:
+**8. Game Creation:**
 
 -Endpoint: `POST /api/admin/create-game`
 -Description: Request for admins to create new game lobbies for players to join.
 -Response: Success or failure indication.
 
-9. Leaderboards:
+**9. Leaderboards:**
 
 -Endpoint: `GET /api/player/leaderboard`
 -Description: Request to retrieve the leaderboard data, showing portfolio values of all players in the lobby.
 -Response: Leaderboard data.
 
-10. Graphs - Stock Performance:
+**10. Graphs - Stock Performance:**
 
 -Endpoint: `GET /api/player/stock-performance`
 -Description: Request to display the graph of a company stock within a selected time frame with set intervals.
