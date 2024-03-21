@@ -1,28 +1,24 @@
 import { MongoClient } from 'mongodb';
 
-
 const port = 27017;
 const url = `mongodb://localhost:${port}`;
+const dbName = 'StockUP';
 
 const client = new MongoClient(url);
 
 export async function connectToDatabase() {
-
     try {
-        // Connect to database
+        // Connect to the database
         await client.connect();
         console.log(`Connected to the database on port: ${port}`);
-        return client;
-
+        return client.db(dbName);
     } catch (error) {
-        console.log(`Error connecting to the database: ${error}`);
+        console.error(`Error connecting to the database: ${error}`);
         throw error;
     }
-
 }
 
 export async function disconnectDatabase() {
-
     try {
         await client.close();
         console.log("Disconnected from the database");
@@ -31,65 +27,46 @@ export async function disconnectDatabase() {
     }
 }
 
-export async function insertToCollection(client, documents, dbName, collectionName) {
-    const db = client.db(`${dbName}`);
-
-    const collection = db.collection(collectionName);
-
-    collection.insertMany(documents, (err, result) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-
-        console.log("Documents inserted: ", result.insertedIds);
-    })
+export async function insertToCollection(db, documents, collectionName) {
+    try {
+        const collection = db.collection(collectionName);
+        await collection.insertOne(documents);
+        console.log("Documents inserted: ", documents);
+        return
+    } catch (error) {
+        console.error("Error inserting documents: ", error);
+    }
 }
 
-export async function findInCollection(client, query, dbName, collectionName) {
-    const db = client.db(`${dbName}`);
-
-    const collection = db.collection(collectionName);
-
-    const result = collection.find(query).toArray((err, documents) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-
-        console.log('Results: ', documents)
-    });
-
-    return result;
+export async function findInCollection(db, query, collectionName) {
+    try {
+        const collection = db.collection(collectionName);
+        const result = await collection.find(query).toArray();
+        console.log('Results: ', result);
+        return result;
+    } catch (error) {
+        console.error("Error finding documents: ", error);
+        return [];
+    }
 }
 
-export async function deleteInCollection(client, query, dbName, collectionName) {
-    const db = client.db(`${dbName}`);
-
-    const collection = db.collection(collectionName);
-
-    collection.deleteMany(query, (err, result) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-
-        console.log("Document deleted: ", result)
-    });
+export async function deleteInCollection(db, query, collectionName) {
+    try {
+        const collection = db.collection(collectionName);
+        const result = await collection.deleteOne(query);
+        console.log("Documents deleted: ", result.deletedCount);
+    } catch (error) {
+        console.error("Error deleting documents: ", error);
+    }
 }
 
-export async function updateInCollection(client, query , updateQuery, dbName, collectionName) {
-    const db = client.db(`${dbName}`);
-
-    const collection = db.collection(collectionName);
-
-    collection.updateOne(query, updateQuery, (err, result) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-
-        console.log("Document deleted: ", result)
-    });
+export async function updateInCollection(db, query, updateQuery, collectionName) {
+    try {
+        const collection = db.collection(collectionName);
+        const result = await collection.updateOne(query, updateQuery);
+        console.log("Document updated: ", result.modifiedCount);
+    } catch (error) {
+        console.error("Error updating document: ", error);
+    }
 }
 
