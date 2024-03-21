@@ -3,7 +3,7 @@ import session from 'express-session';
 import bodyParser from 'body-parser'
 import { aggregate, getDailySnapshot } from './src/services/APIService.mjs';
 import { connectToDatabase, disconnectDatabase } from './src/storage/DatabaseConnection.mjs';
-import { registerUser } from './src/auth/authentication.mjs';
+import { registerUser, verifyLogin } from './src/auth/authentication.mjs';
 
 const app = express();
 const port = 8820;
@@ -46,6 +46,36 @@ app.get('/aggregate', async (req, res) => {
 
 
 })
+
+app.post('/login', async (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    console.log("username", username)
+
+    try {
+        const validLogin = await verifyLogin(client, username, password)
+        console.log("####################", validLogin)
+
+        if (validLogin) {
+            req.session.username = username;
+            return res.status(200).json({"message": "Login successful"});
+
+        } else {
+            return res.status(401).json({'message': "Unauthorized"})
+        }
+    } catch (err) {
+        console.error(err)
+        res.status(401)
+    }
+})
+
+app.get('/logout', (req, res) => {
+    // Destroy session
+    req.session.destroy();
+
+    console.log("Logged out successfully")
+    res.send('Logged out successfully');
+});
 
 app.post('/register', async (req, res) => {
     const username = req.body.username;

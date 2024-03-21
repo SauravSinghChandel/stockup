@@ -28,9 +28,6 @@ describe('MongoDB Functions', () => {
             const query = { "age": { "$gt": 30 } };
             const result = await findInCollection(client, query, collectionName);
 
-            console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-            console.log(result)
-            console.log(result.length)
             expect(result).to.be.an('array');
             expect(result).to.have.lengthOf.above(0);
             console.log('Found documents:', result);
