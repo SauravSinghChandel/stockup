@@ -107,13 +107,13 @@ The JavaScript code files follow a modular architecture, with separate files for
 ## Setup and Running the Server
 
 1. Clone the repository to your local machine.
-2. Navigate to the `docs` and run `npm install` to install dependencies.
+2. Navigate to the `doc` and run `npm install` to install dependencies.
 3. Start the server with `node main.mjs`.
 4. The server will run on port 8820 by default.
 
 ## Running Unit Tests
 
-1. Go into `docs`
+1. Go into `doc`
 2. Run `npx mocha tests` to execute unit tests.
 3. Check the test results for any failed tests or issues.
 
