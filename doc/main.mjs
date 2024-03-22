@@ -4,11 +4,16 @@ import bodyParser from 'body-parser'
 import { aggregate, getDailySnapshot } from './src/services/APIService.mjs';
 import { connectToDatabase, disconnectDatabase } from './src/storage/DatabaseConnection.mjs';
 import { registerUser, verifyLogin } from './src/auth/authentication.mjs';
+import { Game } from './src/game/Game.mjs';
+import { Player } from './src/players/Player.mjs';
+
 
 const app = express();
 const port = 8820;
 
 const client = await connectToDatabase();
+
+let activeGames = [];
 
 app.use(session({
     secret: "this_is_secret_dont_look_at_it",
@@ -27,7 +32,7 @@ app.listen(port, () => {
 });
 
 app.get('/aggregate', async (req, res) => {
-    
+
     const ticker = req.query.ticker;
     const multiplier = req.query.multiplier;
     const timespan = req.query.timespan;
@@ -36,12 +41,11 @@ app.get('/aggregate', async (req, res) => {
 
     try {
         const data = await aggregate(ticker, multiplier, timespan, from, to);
-        console.log(data);
         return res.status(200).send(data);
     } catch (err) {
         console.error(err);
-        
-        return res.status(401).json({'message': "Not found"})
+
+        return res.status(401).json({ 'message': "Not found" })
     }
 
 
@@ -50,24 +54,56 @@ app.get('/aggregate', async (req, res) => {
 app.post('/login', async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
-    console.log("username", username)
 
     try {
         const validLogin = await verifyLogin(client, username, password)
-        console.log("####################", validLogin)
 
         if (validLogin) {
             req.session.username = username;
-            return res.status(200).json({"message": "Login successful"});
+            req.session.isAdmin = false;
+            req.session.isLoggedIn = true;
+            console.log("$$$$$$$$$$$$$$$$$$$$$$$", req.session.isAdmin, req.session.username, req.session.isLoggedIn)
+            return res.status(200).json({ "message": "Login successful" });
 
         } else {
-            return res.status(401).json({'message': "Unauthorized"})
+            return res.status(401).json({ 'message': "Unauthorized" })
         }
     } catch (err) {
         console.error(err)
         res.status(401)
     }
 })
+
+app.post('/admin', (req, res) => {
+
+    const isLoggedIn = req.session.isLoggedIn;
+    console.log("############################", req.session.username, req.session.isLoggedIn)
+
+
+    if (!isLoggedIn) {
+        console.log("You need to log in first!")
+        return res.status(401).json({
+            "message": "Not logged in"
+        })
+    }
+
+    try {
+
+        console.log("%%%%%%%%%%%%%", req.session.isAdmin, req.session.username);
+        console.log("%%%%^^^%%%%%%", req.session, "\n^^^^^^^^^^^", req.query.makeAdmin)
+        const makeAdmin = Boolean(req.query.makeAdmin);
+        req.session.isAdmin = makeAdmin
+        console.log("%%%%%%%%%%%%%", req.session.isAdmin, req.session.username);
+
+        return res.status(200).send(req.session);
+
+    } catch (err) {
+        console.error(err);
+
+        return res.status(400).send(req.session.isAdmin);
+    }
+});
+
 
 app.get('/logout', (req, res) => {
     // Destroy session
@@ -91,7 +127,7 @@ app.post('/register', async (req, res) => {
 
             return res.status(200).json({ "Ok": "Ok" })
         } else {
-            return res.status(401).json({"Error": "Username already exists"})
+            return res.status(401).json({ "Error": "Username already exists" })
         }
 
 
@@ -109,9 +145,158 @@ app.get('/dailySnapshot', async (req, res) => {
     return res.status(200).send(data)
 })
 
+app.post('/createGame', (req, res) => {
+
+
+    const gameName = req.body.name;
+    const maxPlayes = req.body.maxPlayers;
+    const duration = req.body.duration;
+    const minAmount = req.body.minAmount;
+    const goalAmount = req.body.goalAmount;
+
+    if (req.session.isAdmin) {
+
+        try {
+
+            const newGame = new Game(gameName, req.session.username, maxPlayes, duration, minAmount, goalAmount);
+            activeGames.push(newGame)
+
+            return res.status(200).json({
+                "message": "Game created successfully",
+                "gameID": newGame.gameID
+            })
+
+
+        } catch (err) {
+            console.error(err);
+            return res.status(400)
+        }
+    } else {
+        return res.status(401).json({
+            'message': "Does not have Admin access"
+        })
+    }
+})
+
+app.post('/endGame', async (req, res) => {
+    const gameID = req.query.gameID;
+
+    try {
+
+        let gameToRemove = activeGames.filter(game => game.gameID === gameID);
+
+        // Add winner logic here after every sell call 
+
+        if (gameToRemove instanceof Game) {
+
+            gameToRemove.completed = true;
+            await gameToRemove.toDatabase(client);
+            activeGames = activeGames.filter(game => game.gameID !== gameID);
+
+            return res.status(200).json({
+                "message": `Game (${gameToRemove.gameID}) removed successfully`
+            })
+        } else {
+            return res.status(404).json({
+                "message": `Game (${gameToRemove.gameID}) not found`
+            })
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(400);
+    }
+});
+
+app.post('/joinGame', async (req, res) => {
+    
+    console.log(req)
+    console.log("heY")
+    const gameID = req.query.gameID;
+
+    let game = activeGames.find(game => game.gameID === gameID)
+
+    console.log("Yello")
+    if (game instanceof Game) {
+
+        console.log("I am in", req.session.username)
+
+        let player = new Player(client, req.session.username, game);
+
+        game.players[username] = player
+
+        return res.status(200).json({
+            "message": `Player ${player.username} has joined Game ${game.gameID}`
+        })
+
+    } else {
+        return res.status(404).json({
+            "message": `Game (${gameID}) not found`
+        })
+    }
+});
+
+app.post('/buyStock', async (req, res) => {
+    const { symbol, quantity } = req.body;
+
+    try {
+        // Validate symbol and quantity
+        // Perform the buy transaction logic
+        // Update user's portfolio or account balance
+
+        return res.status(200).json({ message: 'Stock bought successfully' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Error buying stock' });
+    }
+});
+
+app.post('/sellStock', async (req, res) => {
+    const { symbol, quantity } = req.body;
+
+    try {
+        // Validate symbol, quantity, and user's stock holdings
+        // Perform the sell transaction logic
+        // Update user's portfolio or account balance
+
+        return res.status(200).json({ message: 'Stock sold successfully' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Error selling stock' });
+    }
+});
+
+app.get('/portfolio', async (req, res) => {
+    try {
+        // Retrieve user's portfolio from the database
+        // Return the portfolio data
+
+        const portfolioData = /* Fetch portfolio data */;
+        return res.status(200).json(portfolioData);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Error fetching portfolio' });
+    }
+});
+
+app.get('/stockPrice', async (req, res) => {
+    const { symbol } = req.query;
+
+    try {
+        // Fetch the current price of the stock symbol from an external API or database
+        // Return the stock price
+
+        const stockPrice = /* Fetch stock price */;
+        return res.status(200).json({ symbol, price: stockPrice });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Error fetching stock price' });
+    }
+});
+
 app.on('close', async () => {
     disconnectDatabase(client);
     console.log("Connection to MongoDB closed")
-})
+});
 
 export default app;
+export { activeGames };

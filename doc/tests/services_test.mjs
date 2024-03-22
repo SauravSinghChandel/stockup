@@ -3,7 +3,6 @@ import request from 'supertest';
 import chaiHttp from 'chai-http';
 import app from '../main.mjs';
 import { connectToDatabase, disconnectDatabase } from '../src/storage/DatabaseConnection.mjs';
-import { getDailySnapshot } from '../src/services/APIService.mjs';
 
 use(chaiHttp);
 

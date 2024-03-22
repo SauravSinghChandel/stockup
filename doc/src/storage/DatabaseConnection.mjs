@@ -42,7 +42,7 @@ export async function findInCollection(db, query, collectionName) {
     try {
         const collection = db.collection(collectionName);
         const result = await collection.find(query).toArray();
-        console.log('Results: ', result);
+        console.log('Documents found: ', result);
         return result;
     } catch (error) {
         console.error("Error finding documents: ", error);

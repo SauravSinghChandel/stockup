@@ -184,6 +184,6 @@ Use Alpha Vantage API for retrieving stock prices:
 
 ## Attributions
 I acknowledge the contribution of classmates in generating feature ideas during discussions.
-I also would like to acknowledge the contribution of ChatGPT in formatting the project description and checking for grammar.
+I also would like to acknowledge the contribution of ChatGPT in formatting the project description and checking for grammar and helping with guiding about code architecture
 
 ---

@@ -42,9 +42,8 @@ export async function verifyLogin(db, uname, password) {
     try {
 
         const result = await findInCollection(db, { "username": uname }, 'users');
-        console.log("kasdfjghlasdiufhadsolifhdaslfijkahsdflkjasdflkasf", result[0])
 
-        if (result.length < 0) {
+        if (result.length < 1) {
             
             return false;
 

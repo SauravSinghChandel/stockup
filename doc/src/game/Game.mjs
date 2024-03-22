@@ -1,14 +1,17 @@
-class Game {
-    constructor(name, creator, maxPlayers, duration, minAmount) {
-        this.gameId = generateGameID(name);
+import { insertToCollection } from "../storage/DatabaseConnection.mjs";
+
+export class Game {
+    constructor(name, creator, maxPlayers, duration, minAmount, goalAmount) {
+        this.gameID = generateGameID(name);
         this.name = name;
         this.creator = creator;
         this.maxPlayers = maxPlayers;
-        this.duration = duration;
+        this.duration = duration; // [start, end]
         this.players = {};
-        this.winner = {};
+        this.winner = null;
         this.minAmount = minAmount;
         this.completed = false;
+        this.goalAmount = goalAmount;
     }
 
     addPlayer(player) {
@@ -20,9 +23,9 @@ class Game {
         delete this.players[playerId];
     }
 
-    toDatabase() {
+    async toDatabase(client) {
         const game = {
-            gameId: this.gameId,
+            gameID: this.gameID,
             name: this.name,
             creator: this.creator,
             maxPlayer: this.maxPlayers,
@@ -32,14 +35,16 @@ class Game {
             minAmount: this.minAmount,
         }
 
-        return game;
+        await insertToCollection(client, game, "games");
+
+        return ;
     }
 
 }
 
 function generateGameID(name) {
     let key;
-    time = Date.now().toString(36);
+    const time = Date.now().toString(36);
 
     key = `${name}-${time}`;
 
