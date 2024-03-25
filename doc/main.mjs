@@ -270,7 +270,6 @@ app.get('/portfolio', async (req, res) => {
         // Retrieve user's portfolio from the database
         // Return the portfolio data
 
-        const portfolioData = /* Fetch portfolio data */;
         return res.status(200).json(portfolioData);
     } catch (err) {
         console.error(err);
@@ -285,7 +284,6 @@ app.get('/stockPrice', async (req, res) => {
         // Fetch the current price of the stock symbol from an external API or database
         // Return the stock price
 
-        const stockPrice = /* Fetch stock price */;
         return res.status(200).json({ symbol, price: stockPrice });
     } catch (err) {
         console.error(err);
