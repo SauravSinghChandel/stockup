@@ -5,7 +5,7 @@ import { aggregate, getDailySnapshot } from './src/services/APIService.mjs';
 import { connectToDatabase, disconnectDatabase } from './src/storage/DatabaseConnection.mjs';
 import { registerUser, verifyLogin } from './src/auth/authentication.mjs';
 import { Game } from './src/game/Game.mjs';
-import { Player } from './src/players/Player.mjs';
+import { Player, createPlayer } from './src/players/Player.mjs';
 
 
 const app = express();
@@ -89,11 +89,8 @@ app.post('/admin', (req, res) => {
 
     try {
 
-        console.log("%%%%%%%%%%%%%", req.session.isAdmin, req.session.username);
-        console.log("%%%%^^^%%%%%%", req.session, "\n^^^^^^^^^^^", req.query.makeAdmin)
         const makeAdmin = Boolean(req.query.makeAdmin);
         req.session.isAdmin = makeAdmin
-        console.log("%%%%%%%%%%%%%", req.session.isAdmin, req.session.username);
 
         return res.status(200).send(req.session);
 
@@ -161,6 +158,8 @@ app.post('/createGame', (req, res) => {
             const newGame = new Game(gameName, req.session.username, maxPlayes, duration, minAmount, goalAmount);
             activeGames.push(newGame)
 
+            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", req.session)
+
             return res.status(200).json({
                 "message": "Game created successfully",
                 "gameID": newGame.gameID
@@ -183,13 +182,21 @@ app.post('/endGame', async (req, res) => {
 
     try {
 
-        let gameToRemove = activeGames.filter(game => game.gameID === gameID);
+        console.log("active games", activeGames);
+        let gameToRemove = activeGames.filter(game => game.gameID === gameID)[0];
 
-        // Add winner logic here after every sell call 
 
         if (gameToRemove instanceof Game) {
 
+            const playersArray = Object.values(gameToRemove.players);
+
+            const winner = playersArray.reduce((maxPlayer, currentPlayer) => {
+                return currentPlayer.balance > maxPlayer.balance ? currentPlayer : maxPlayer;
+            }, { name: '', balance: -Infinity }); // Set initial maxPlayer with lowest possible balance
+
+
             gameToRemove.completed = true;
+            gameToRemove.winner = winner
             await gameToRemove.toDatabase(client);
             activeGames = activeGames.filter(game => game.gameID !== gameID);
 
@@ -208,7 +215,8 @@ app.post('/endGame', async (req, res) => {
 });
 
 app.post('/joinGame', async (req, res) => {
-    
+
+    let player;
     console.log(req)
     console.log("heY")
     const gameID = req.query.gameID;
@@ -220,9 +228,13 @@ app.post('/joinGame', async (req, res) => {
 
         console.log("I am in", req.session.username)
 
-        let player = new Player(client, req.session.username, game);
+        //let player = await createPlayer(client, req.session.username, game);
 
-        game.players[username] = player
+        console.log("Session: \n#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\n", gameID)
+        player = new Player(req.session.username, game);
+        console.log("Player: ", player)
+
+        game.players[req.session.username] = player
 
         return res.status(200).json({
             "message": `Player ${player.username} has joined Game ${game.gameID}`

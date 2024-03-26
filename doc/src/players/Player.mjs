@@ -4,7 +4,7 @@ export class Player {
     constructor(name, game) {
         this.name = name;
         this.balance = game.minAmount;
-        this.game = game;
+        this.gameID = game.gameID;
         this.portfolio = {};
     }
 
@@ -12,7 +12,7 @@ export class Player {
         const player = {
             name: this.name,
             balance: this.balance,
-            game: this.game,
+            gameID: this.gameID,
             portfolio: this.portfolio,
         }
 
@@ -20,12 +20,12 @@ export class Player {
     }
 }
 
-export async function createPlayer(client, username, game) {
+export async function createPlayer(client, username, gameID) {
 
     console.log("In the createPlayer functuion")
     query = { "username": username }
 
-    let player = new Player(username, game)
+    let player = new Player(username, gameID)
     return player
 
     /*

@@ -99,9 +99,7 @@ describe('Game API Test', () => {
             throw new Error('User login failed');
         }
         // Store the session information
-        console.log("LOGIN RES", loginRes.header)
         testUserSession = loginRes.header['set-cookie'];
-        console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n", loginRes.header)
 
         const adminRes = request(app)
             .post('/admin?makeAdmin=true')
@@ -110,9 +108,8 @@ describe('Game API Test', () => {
                 if (err) return done(err)
             })
 
-        console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n", adminRes.header)
+        console.log("444444444444444444444444444444444", adminRes)
         testUserSession = adminRes.header['Cookie'];
-        console.log(testUserSession)
 
     });
 
@@ -138,27 +135,24 @@ describe('Game API Test', () => {
             .expect(200);
 
 
-        testUserSession = res.header['Cookie'];
 
         expect(res.body).to.have.property('message').to.equal('Game created successfully');
         expect(res.body).to.have.property('gameID');
         gameID = res.body.gameID; // Store the gameId for later tests
-        console.log(gameID, "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     });
 
     it('should join an existing game', async () => {
 
-        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", activeGames)
-        console.log(testUserSession)
         const res = await request(app)
             .post(`/joinGame?gameID=${gameID}`) // Use the gameId from the first test
             .set('Cookie', testUserSession)
             .expect(200);
 
-        expect(res.body).to.have.property('message').to.equal('Joined game successfully');
+        expect(res.body).to.have.property('message').to.equal(`Player ${testUserSession.username} has joined Game ${gameID}`);
     });
 
     it('should end an existing game', async () => {
+        console.log(gameID)
         const res = await request(app)
             .post(`/endGame?gameID=${gameID}`) // Use the gameId from the previous test
             .set('Cookie', testUserSession)
