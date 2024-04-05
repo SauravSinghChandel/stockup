@@ -15,6 +15,16 @@ const client = await connectToDatabase();
 
 let activeGames = [];
 
+const staticFilesPath = "./src/html"
+
+function checkLoggedIn(req) {
+    if (req.session.isLoggedIn) {
+        return true; // Continue to the next middleware or route handler
+    } else {
+        return false; // Redirect to the login page if not logged in
+    }
+}
+
 app.use(session({
     secret: "this_is_secret_dont_look_at_it",
     resave: false,
@@ -23,8 +33,16 @@ app.use(session({
 
 app.use(bodyParser.json());
 
+app.use(express.static(staticFilesPath));
+
 app.get('/', (req, res) => {
     const data = null;
+
+    if (checkLoggedIn(req)) {
+        res.sendFile('/src/html/index.html', { root: '.' })
+    } else {
+        res.sendFile('/src/html/login_page.html', { root: '.' })
+    }
 });
 
 app.listen(port, () => {
@@ -63,6 +81,7 @@ app.post('/login', async (req, res) => {
             req.session.isAdmin = false;
             req.session.isLoggedIn = true;
             console.log("$$$$$$$$$$$$$$$$$$$$$$$", req.session.isAdmin, req.session.username, req.session.isLoggedIn)
+
             return res.status(200).json({ "message": "Login successful" });
 
         } else {
@@ -77,7 +96,7 @@ app.post('/login', async (req, res) => {
 app.post('/admin', (req, res) => {
 
     const isLoggedIn = req.session.isLoggedIn;
-    console.log("############################", req.session.username, req.session.isLoggedIn)
+    console.log("############################", req.session.username, req.session.isLoggedIn, req.session.isAdmin)
 
 
     if (!isLoggedIn) {
@@ -90,7 +109,8 @@ app.post('/admin', (req, res) => {
     try {
 
         const makeAdmin = Boolean(req.query.makeAdmin);
-        req.session.isAdmin = makeAdmin
+        req.session.isAdmin = !makeAdmin
+
 
         return res.status(200).send(req.session);
 
@@ -100,6 +120,11 @@ app.post('/admin', (req, res) => {
         return res.status(400).send(req.session.isAdmin);
     }
 });
+
+app.get('/activeGames', (req, res) => {
+    res.json(activeGames)
+    return activeGames;
+})
 
 
 app.get('/logout', (req, res) => {
