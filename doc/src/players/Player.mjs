@@ -6,6 +6,7 @@ export class Player {
         this.balance = game.minAmount;
         this.gameID = game.gameID;
         this.portfolio = {};
+        this.portfolioValue = 0;
     }
 
     toDatabase() {
@@ -14,9 +15,13 @@ export class Player {
             balance: this.balance,
             gameID: this.gameID,
             portfolio: this.portfolio,
+            portfolioValue: this.portfolioValue,
         }
 
         return player
+    }
+
+    calculatePortfolioValue() {
     }
 }
 

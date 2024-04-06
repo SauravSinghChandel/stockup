@@ -65,9 +65,19 @@ app.get('/aggregate', async (req, res) => {
 
         return res.status(401).json({ 'message': "Not found" })
     }
+});
 
-
-})
+app.get('/getUserDetails', (req, res) => {
+    if (req.session.username) {
+        const userDetails = {
+            username: req.session.username
+        }
+        return res.status(200).json({"message": "Details sent successfully",
+        'userDetails': userDetails})
+    } else {
+        return res.status(404).json({"message": "Not logged in"})
+    }
+});
 
 app.post('/login', async (req, res) => {
     const username = req.body.username;
@@ -78,7 +88,7 @@ app.post('/login', async (req, res) => {
 
         if (validLogin) {
             req.session.username = username;
-            req.session.isAdmin = false;
+            req.session.isAdmin = true;
             req.session.isLoggedIn = true;
             console.log("$$$$$$$$$$$$$$$$$$$$$$$", req.session.isAdmin, req.session.username, req.session.isLoggedIn)
 
@@ -167,23 +177,35 @@ app.get('/dailySnapshot', async (req, res) => {
     return res.status(200).send(data)
 })
 
-app.post('/createGame', (req, res) => {
+function getRandomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
+app.post('/createGame', async (req, res) => {
 
+    const date = `2023-${getRandomInteger(10, 12)}-${getRandomInteger(10, 27)}`
     const gameName = req.body.name;
     const maxPlayes = req.body.maxPlayers;
     const duration = req.body.duration;
     const minAmount = req.body.minAmount;
     const goalAmount = req.body.goalAmount;
+    const response = await fetch(`http://localhost:8820/dailySnapshot?date=${date}`);
+    const data = await response.json()
+    console.log("Data", data)
+    const stockList = data.results.slice(0, 100);
 
     if (req.session.isAdmin) {
 
         try {
 
             const newGame = new Game(gameName, req.session.username, maxPlayes, duration, minAmount, goalAmount);
+            newGame.stockList = stockList.map(stock => ({
+                symbol: stock.T,
+                openPrice: stock.o,
+                closingPrice: stock.c,
+            }))
             activeGames.push(newGame)
 
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", req.session)
 
             return res.status(200).json({
                 "message": "Game created successfully",
@@ -204,6 +226,7 @@ app.post('/createGame', (req, res) => {
 
 app.post('/endGame', async (req, res) => {
     const gameID = req.query.gameID;
+    console.log(gameID)
 
     try {
 
@@ -242,13 +265,10 @@ app.post('/endGame', async (req, res) => {
 app.post('/joinGame', async (req, res) => {
 
     let player;
-    console.log(req)
-    console.log("heY")
     const gameID = req.query.gameID;
 
     let game = activeGames.find(game => game.gameID === gameID)
 
-    console.log("Yello")
     if (game instanceof Game) {
 
         console.log("I am in", req.session.username)
@@ -262,7 +282,8 @@ app.post('/joinGame', async (req, res) => {
         game.players[req.session.username] = player
 
         return res.status(200).json({
-            "message": `Player ${player.username} has joined Game ${game.gameID}`
+            "message": `Player ${player.username} has joined Game ${game.gameID},
+            "game": ${game}`
         })
 
     } else {
@@ -271,6 +292,24 @@ app.post('/joinGame', async (req, res) => {
         })
     }
 });
+
+app.get('/getGame', (req, res) => {
+    const gameID = req.query.gameID
+    const game = { ...activeGames[activeGames.findIndex(game => game.gameID === gameID)]}
+
+    return res.status(200).json({"game": game});
+})
+
+app.post('/updateGame', async (req, res) => {
+    const gameID = req.body.gameID;
+    const gameUpdated = req.body.game;
+    const gameIndex = activeGames.findIndex(game => game.gameID === gameID);
+
+    if (gameIndex !== -1) {
+        activeGames[gameIndex] = gameUpdated;
+        console.log('Game updated successfully', activeGames[gameIndex]);
+    }
+})
 
 app.post('/buyStock', async (req, res) => {
     const { symbol, quantity } = req.body;

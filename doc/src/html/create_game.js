@@ -1,15 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const gameID = queryParams.get('gameID');
+    console.log(gameID);
+
     const createGameForm = document.getElementById('createGameForm');
     const resultContainer = document.getElementById('resultContainer');
 
     createGameForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const gameName = document.getElementById('gameName').value;
+        const name = document.getElementById('name').value;
         const maxPlayers = document.getElementById('maxPlayers').value;
         const duration = document.getElementById('duration').value;
         const minAmount = document.getElementById('minAmount').value;
         const goalAmount = document.getElementById('goalAmount').value;
+        console.log(name)
 
         try {
             const response = await fetch('http://localhost:8820/createGame', {
@@ -17,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ gameName, maxPlayers, duration, minAmount, goalAmount }),
+                body: JSON.stringify({ name, maxPlayers, duration, minAmount, goalAmount }),
                 credentials: 'include', // Ensure session cookies are sent
             });
 

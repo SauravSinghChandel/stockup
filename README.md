@@ -1,5 +1,11 @@
 # StockUP API
 
+## Part 3:
+- Frontend Working: The procedure to run the server is same as before
+- go to root, `cd doc`, `node main.mjs` and then going to the browser and opening `http://localhost:8820`
+- I have also uploaded a video showing how to start the server and showing that all the feautres are working
+- Link: 
+
 ## Repository Layout
 - **docs/**: Contains src and tests
 - **src/**: Contains the source code files for services, authentication, games, players, and database connections.
