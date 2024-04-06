@@ -6,7 +6,7 @@
 - Type `cd doc` in terminal
 - Type `node main.mjs` in terminal to run the server and then going to the browser and opening `http://localhost:8820`
 - I have also uploaded a video showing how to start the server and showing that all the feautres are working
-- Link: 
+- Link: https://youtu.be/OYxrB7-Hq7M
 
 ## Repository Layout
 - **docs/**: Contains src and tests
