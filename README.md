@@ -2,7 +2,9 @@
 
 ## Part 3:
 - Frontend Working: The procedure to run the server is same as before
-- go to root, `cd doc`, `node main.mjs` and then going to the browser and opening `http://localhost:8820`
+- Go to root
+- Type `cd doc` in terminal
+- Type `node main.mjs` in terminal to run the server and then going to the browser and opening `http://localhost:8820`
 - I have also uploaded a video showing how to start the server and showing that all the feautres are working
 - Link: 
 

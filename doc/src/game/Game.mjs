@@ -14,10 +14,6 @@ export class Game {
         this.goalAmount = goalAmount;
         this.day = 0;
         this.stockList = null;
-app.post('/endGame', async (req, res) => {
-    const gameID = req.query.gameID;
-    console.log(gameID)
-
     }
 
     addPlayer(player) {
