@@ -1,3 +1,9 @@
+***
+***
+# Note: 
+In a course-based project, I developed a stock trading game, emphasizing full-stack development and API integration. I built a robust backend using JavaScript, MongoDB, and thorough testing to ensure seamless functionality. Leveraging a stock trading API, I designed a game environment where players could experience the dynamics of the stock market. While the semester's time constraints limited the front-end's polish, the project successfully showcases my ability to handle complex backend development, API integration, and deliver results within a challenging deadline.
+***
+***
 # StockUP API
 
 ## Part 3:
